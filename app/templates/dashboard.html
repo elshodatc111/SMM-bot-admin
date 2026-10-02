@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, empty, ord_tag %}{% block title %}Bosh sahifa{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Bosh sahifa</h1>
+  <div class="actions"><a class="btn ghost sm" href="/admin/export/users.xlsx">{{ ico('download') }}Foydalanuvchilar</a>
+  <a class="btn ghost sm" href="/admin/export/payments.xlsx">{{ ico('download') }}To'lovlar</a></div></div>
+
+<div class="stats">
+  <div class="stat"><span class="ibox teal">{{ ico('users') }}</span><div><small>Ro'yxatdan o'tganlar</small><b>{{ s.users_reg }}</b><em>bugun +{{ s.users_today }}</em></div></div>
+  <div class="stat"><span class="ibox green">{{ ico('key') }}</span><div><small>Faol litsenziyalar</small><b>{{ s.lic_active }}</b><em>7 kunda tugaydi: {{ s.lic_expiring }}</em></div></div>
+  <div class="stat"><span class="ibox blue">{{ ico('clock') }}</span><div><small>Aktivlashtirilmagan</small><b>{{ s.lic_new }}</b><em>token berilgan, kiritilmagan</em></div></div>
+  <div class="stat"><span class="ibox amber">{{ ico('trend') }}</span><div><small>Shu oy tushum</small><b>{{ s.rev_month|uzs }}</b><em>so'm · bugun {{ s.rev_today|uzs }}</em></div></div>
+  <div class="stat"><span class="ibox teal">{{ ico('card') }}</span><div><small>Jami tushum</small><b>{{ s.rev_total|uzs }}</b><em>so'm</em></div></div>
+  <a class="stat link {{ 'alert' if s.pending_dev }}" href="/admin/devices"><span class="ibox {{ 'red' if s.pending_dev else 'slate' }}">{{ ico('monitor') }}</span><div><small>Qurilma so'rovlari</small><b>{{ s.pending_dev }}</b><em>{{ 'javob kutilmoqda' if s.pending_dev else 'yangi so\'rov yo\'q' }}</em></div></a>
+</div>
+
+<div class="grid2">
+  <section class="card">
+    <div class="card-head"><h2>{{ ico('chart') }}So'nggi 14 kun tushumi</h2><a href="/admin/stats">Batafsil</a></div>
+    {% set mx = (days|map(attribute='revenue')|max) or 1 %}
+    <div class="bars" role="img" aria-label="Kunlik tushum diagrammasi">
+      {% for r in days|reverse %}
+      <div class="bar-col" title="{{ r.date }}: {{ r.revenue|uzs }} so'm, to'lov {{ r.paid }} ta">
+        <span class="bar-v">{% if r.revenue %}{{ (r.revenue // 1000) }}k{% endif %}</span>
+        <i style="height:{{ [(r.revenue*100/mx)|int, 3]|max }}%" class="{{ 'zero' if not r.revenue }}"></i>
+        <span class="bar-d">{{ r.date[8:] }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mini-stats">
+      <div><small>Yangi mijoz (14 kun)</small><b>{{ days|sum(attribute='users') }}</b></div>
+      <div><small>To'lovlar (14 kun)</small><b>{{ days|sum(attribute='paid') }}</b></div>
+      <div><small>Aktivlashtirishlar</small><b>{{ days|sum(attribute='activations') }}</b></div>
+    </div>
+  </section>
+  <section class="card">
+    <div class="card-head"><h2>{{ ico('card') }}So'nggi to'lovlar</h2><a href="/admin/payments">Hammasi</a></div>
+    {% if recent %}
+    <ul class="list">
+      {% for o in recent %}
+      <li><span class="avatar">{{ (o.full_name or '?')[:1]|upper }}</span>
+        <div class="grow"><b>{{ o.full_name }}</b><small>{{ o.plan_title }} · {{ o.paid_at|dt }}</small></div>
+        <b class="amount">{{ (o.amount_tiyin//100)|uzs }}</b></li>
+      {% endfor %}
+    </ul>
+    {% else %}{{ empty("Hali to'lov yo'q") }}{% endif %}
+  </section>
+</div>
+{% endblock %}

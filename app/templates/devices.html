@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, tag, empty %}{% block title %}Qurilma so'rovlari{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Qurilma almashtirish so'rovlari</h1></div>
+<p class="hint">{{ ico('info') }}<span>Faqat yillik tarif egalari so'ray oladi, har litsenziyaga {{ limit }} marta. Ruxsat bersangiz, kompyuterga bog'lanish o'chadi va token yangi kompyuterda qolgan muddat bilan kiritiladi.</span></p>
+<div class="card flush">{% if rows %}<div class="scroll"><table class="rt">
+  <thead><tr><th>#</th><th>Sana</th><th>Foydalanuvchi</th><th>Litsenziya</th><th>Ishlatilgan</th><th>Holat</th><th></th></tr></thead>
+  <tbody>{% for r in rows %}<tr><td data-label="#">#{{ r.id }}</td><td data-label="Sana">{{ r.created_at|dt }}</td>
+    <td data-label="Foydalanuvchi"><a href="/admin/users/{{ r.user_id }}">{{ r.full_name }}</a><small class="sub">{{ r.phone }}</small></td>
+    <td data-label="Litsenziya"><a href="/admin/licenses/{{ r.license_id }}">#{{ r.license_id }}</a> {{ r.plan_title }}<small class="sub"><code>{{ r.token }}</code></small></td>
+    <td data-label="Ishlatilgan">{{ r.device_resets_used }}/{{ limit }}</td>
+    <td data-label="Holat">{{ tag('warn','kutilmoqda') if r.status=='pending' else (tag('ok','ruxsat berilgan') if r.status=='approved' else tag('bad','rad etilgan')) }}</td>
+    <td class="act">{% if r.status=='pending' %}<div class="btn-row">
+      <form method="post" action="/admin/devices/{{ r.id }}/approve"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn sm">{{ ico('check') }}Ruxsat</button></form>
+      <form method="post" action="/admin/devices/{{ r.id }}/reject"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn danger sm">{{ ico('x') }}Rad</button></form></div>{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>{% else %}{{ empty("So'rov yo'q", 'monitor') }}{% endif %}</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, lic_tag, copy, empty, pager %}{% block title %}Litsenziyalar{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Litsenziyalar <span class="count">{{ total }}</span></h1>
+  <div class="actions"><a class="btn ghost sm" href="/admin/export/licenses.xlsx">{{ ico('download') }}Excel</a></div></div>
+<form method="get" class="searchbar">
+  <span class="input-ico">{{ ico('search') }}<input name="qs" value="{{ qs }}" placeholder="Token, ism yoki telefon" aria-label="Qidirish"></span>
+  <select name="status" onchange="this.form.submit()" aria-label="Holat"><option value="">Hamma holat</option>{% for k,v in STATUS_UZ.items() %}<option value="{{ k }}" {{ 'selected' if k==status }}>{{ v }}</option>{% endfor %}</select>
+  <button class="btn">Qidirish</button></form>
+<div class="card flush">{% if rows %}<div class="scroll"><table class="rt">
+  <thead><tr><th>#</th><th>Token</th><th>Foydalanuvchi</th><th>Tarif</th><th>Holat</th><th>Tugaydi</th><th>Qoldi</th><th>Qurilma</th></tr></thead>
+  <tbody>{% for l in rows %}{% set st = eff_status(l) %}<tr><td data-label="#"><a href="/admin/licenses/{{ l.id }}">#{{ l.id }}</a></td>
+    <td data-label="Token"><code>{{ l.token }}</code>{{ copy(l.token) }}</td>
+    <td data-label="Foydalanuvchi"><a href="/admin/users/{{ l.user_id }}">{{ l.full_name }}</a><small class="sub">{{ l.phone }}</small></td><td data-label="Tarif">{{ l.plan_title }}</td>
+    <td data-label="Holat">{{ lic_tag(st) }}</td><td data-label="Tugaydi">{{ 'Umrbod' if l.days==0 else l.expires_at|dt }}</td><td data-label="Qoldi">{{ '∞' if (l.days==0 and st=='active') else ((days_left(l) ~ ' kun') if st=='active' else '—') }}</td>
+    <td data-label="Qurilma">{{ 'bog\'langan' if l.fp_json else '—' }}</td></tr>{% endfor %}</tbody>
+</table></div>{% else %}{{ empty('Hech narsa topilmadi', 'key') }}{% endif %}</div>
+{{ pager('/admin/licenses', page, total, per, '&status=' ~ status ~ '&qs=' ~ qs) }}
+{% endblock %}

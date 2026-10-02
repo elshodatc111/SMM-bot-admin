@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, tag, empty, pager %}{% block title %}Foydalanuvchilar{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Foydalanuvchilar <span class="count">{{ total }}</span></h1>
+  <div class="actions"><a class="btn ghost sm" href="/admin/export/users.xlsx">{{ ico('download') }}Excel</a></div></div>
+<form method="get" class="searchbar"><span class="input-ico">{{ ico('search') }}<input name="qs" value="{{ qs }}" placeholder="Ism, telefon, @username yoki ID" aria-label="Qidirish"></span><button class="btn">Qidirish</button></form>
+<div class="card flush">
+  {% if rows %}<div class="scroll"><table class="rt">
+  <thead><tr><th>Foydalanuvchi</th><th>Telefon</th><th>Viloyat</th><th>Ro'yxatdan o'tgan</th><th>Lits.</th><th>Holat</th></tr></thead>
+  <tbody>{% for u in rows %}<tr>
+    <td data-label="Foydalanuvchi"><a class="who" href="/admin/users/{{ u.id }}"><span class="avatar">{{ (u.full_name or u.tg_name or '?')[:1]|upper }}</span><span><b>{{ u.full_name or u.tg_name or '—' }}</b><small>{{ ('@'+u.username) if u.username else 'ID ' ~ u.tg_id }}</small></span></a></td>
+    <td data-label="Telefon">{{ u.phone or '—' }}</td><td data-label="Viloyat">{{ u.region or '—' }}</td>
+    <td data-label="Ro'yxatdan o'tgan">{{ u.registered_at|dt if u.registered else 'o\'tmagan' }}</td><td data-label="Litsenziya">{{ u.lic_n }}</td>
+    <td data-label="Holat">{% if u.blocked %}{{ tag('bad','bloklangan') }}{% elif u.bot_blocked %}{{ tag('warn','botni bloklagan') }}{% else %}{{ tag('ok','faol') }}{% endif %}</td></tr>{% endfor %}</tbody>
+  </table></div>{% else %}{{ empty('Hech narsa topilmadi', 'users') }}{% endif %}
+</div>
+{{ pager('/admin/users', page, total, per, '&qs=' ~ qs) }}
+{% endblock %}

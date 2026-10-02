@@ -1,0 +1,41 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, lic_tag, copy, empty %}{% block title %}Litsenziya #{{ lic.id }}{% endblock %}
+{% block body %}
+{% set st = eff_status(lic) %}
+<a class="back" href="/admin/licenses">{{ ico('back') }}Litsenziyalar</a>
+<div class="page-head"><div><h1>Litsenziya #{{ lic.id }}</h1><p class="muted">{{ lic.plan_title }}{% if lic.days %} · {{ lic.days }} kun{% endif %}</p></div><div class="actions">{{ lic_tag(st) }}</div></div>
+<div class="grid2">
+<section class="card"><h2>{{ ico('key') }}Ma'lumot</h2>
+  <dl><dt>Token</dt><dd><code>{{ lic.token }}</code>{{ copy(lic.token) }}</dd>
+  <dt>Foydalanuvchi</dt><dd><a href="/admin/users/{{ u.id }}">{{ u.full_name }}</a> · {{ u.phone }}</dd>
+  <dt>Manba</dt><dd>{{ 'Payme to\'lov' if lic.source=='payme' else 'Admin (qo\'lda)' }}{% if order %} · buyurtma #{{ order.id }}{% endif %}</dd>
+  <dt>Berilgan</dt><dd>{{ lic.created_at|dt }}</dd><dt>Aktivlashtirilgan</dt><dd>{{ lic.activated_at|dt }}</dd>
+  <dt>Tugaydi</dt><dd>{% if lic.days==0 %}Umrbod <span class="muted">(muddat cheklanmagan)</span>{% else %}{{ lic.expires_at|dt }}{% if st=='active' %} <span class="muted">(qoldi {{ days_left(lic) }} kun)</span>{% endif %}{% endif %}</dd>
+  <dt>Kompyuter</dt><dd>{{ ('bog\'langan · ' ~ lic.fp_hash[:12]) if lic.fp_json else 'bog\'lanmagan' }}</dd>
+  <dt>Almashtirishlar</dt><dd>{{ lic.device_resets_used }} / {{ limit }}{% if not is_yearly(lic) %} <span class="muted">(yillik emas)</span>{% endif %}</dd>
+  <dt>Oxirgi tekshiruv</dt><dd>{{ lic.last_check_at|dt }} <span class="muted">{{ lic.last_ip }} {{ lic.app_version }}</span></dd></dl>
+  <form method="post" action="/admin/licenses/{{ lic.id }}/note" class="inline-form"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <input name="note" value="{{ lic.note }}" placeholder="Izoh" aria-label="Izoh"><button class="btn ghost">Saqlash</button></form>
+</section>
+<section class="card"><h2>{{ ico('sliders') }}Amallar</h2>
+  {% if lic.status != 'revoked' %}
+  <form method="post" action="/admin/licenses/{{ lic.id }}/revoke" onsubmit="return confirm('Litsenziya muddatdan oldin tugatiladi. Davom etasizmi?')">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><label>Muddatdan oldin tugatish<input name="note" placeholder="Sabab, masalan: pul qaytarildi"></label>
+    <button class="btn danger">{{ ico('ban') }}Tugatish</button></form>
+  {% else %}
+  <form method="post" action="/admin/licenses/{{ lic.id }}/unrevoke"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn">{{ ico('refresh') }}Qayta tiklash</button></form>
+  {% endif %}
+  {% if lic.days != 0 %}<hr>
+  <form method="post" action="/admin/licenses/{{ lic.id }}/extend"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Muddatni o'zgartirish (kun, minus ham mumkin)</label><div class="inline-form"><input type="number" name="days" value="30" aria-label="Kun"><button class="btn">{{ ico('calendar') }}Qo'llash</button></div></form>{% endif %}
+  <hr>
+  <form method="post" action="/admin/licenses/{{ lic.id }}/reset" onsubmit="return confirm('Kompyuterga bog\'lanish o\'chiriladi. Davom etasizmi?')">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label class="chk"><input type="checkbox" name="count" value="1"><span>Almashtirish limitiga sanash</span></label>
+    <button class="btn ghost">{{ ico('monitor') }}Qurilmani bo'shatish</button></form>
+</section>
+</div>
+<section class="card flush"><div class="card-head pad"><h2>{{ ico('monitor') }}Qurilma so'rovlari</h2></div>
+{% if reqs %}<div class="scroll"><table class="rt"><thead><tr><th>#</th><th>Sana</th><th>Holat</th></tr></thead><tbody>
+{% for r in reqs %}<tr><td data-label="#">#{{ r.id }}</td><td data-label="Sana">{{ r.created_at|dt }}</td><td data-label="Holat">{{ {'pending':'kutilmoqda','approved':'ruxsat berilgan','rejected':'rad etilgan'}[r.status] }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}{{ empty("So'rov yo'q", 'monitor') }}{% endif %}</section>
+{% endblock %}

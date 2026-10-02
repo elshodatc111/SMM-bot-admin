@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% from "_macros.html" import ico %}{% block title %}Statistika{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Kunlik statistika</h1>
+  <form method="get" class="actions">
+    <select name="days" onchange="this.form.submit()" aria-label="Davr">{% for d in (7,14,30,60,90,180,365) %}<option value="{{ d }}" {{ 'selected' if d==ndays }}>{{ d }} kun</option>{% endfor %}</select>
+    <a class="btn ghost sm" href="/admin/export/stats.xlsx?days={{ ndays }}">{{ ico('download') }}Excel</a></form></div>
+<div class="stats small">
+  <div class="stat"><span class="ibox teal">{{ ico('users') }}</span><div><small>Yangi foydalanuvchi</small><b>{{ tot.users }}</b></div></div>
+  <div class="stat"><span class="ibox green">{{ ico('card') }}</span><div><small>To'langan</small><b>{{ tot.paid }}</b><em>buyurtma {{ tot.orders }}</em></div></div>
+  <div class="stat"><span class="ibox amber">{{ ico('trend') }}</span><div><small>Tushum (so'm)</small><b>{{ tot.revenue|uzs }}</b></div></div>
+  <div class="stat"><span class="ibox blue">{{ ico('key') }}</span><div><small>Aktivlashtirilgan</small><b>{{ tot.activations }}</b><em>berilgan {{ tot.issued }}</em></div></div>
+</div>
+<div class="card flush"><div class="scroll"><table class="rt">
+  <thead><tr><th>Sana</th><th>Yangi foydalanuvchi</th><th>Buyurtma</th><th>To'langan</th><th class="num">Tushum (so'm)</th><th>Berilgan lits.</th><th>Aktivlashtirilgan</th></tr></thead>
+  <tbody>{% for r in rows %}<tr>
+    <td data-label="Sana">{{ r.date }}</td><td data-label="Yangi foydalanuvchi">{{ r.users }}</td><td data-label="Buyurtma">{{ r.orders }}</td><td data-label="To'langan">{{ r.paid }}</td>
+    <td data-label="Tushum" class="num">{{ r.revenue|uzs }}</td><td data-label="Berilgan lits.">{{ r.issued }}</td><td data-label="Aktivlashtirilgan">{{ r.activations }}</td></tr>{% endfor %}</tbody>
+</table></div></div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, ord_tag, empty, pager %}{% block title %}To'lovlar{% endblock %}
+{% block body %}
+<div class="page-head"><h1>To'lovlar <span class="count">{{ total }}</span></h1>
+  <form method="get" class="actions"><select name="status" onchange="this.form.submit()" aria-label="Holat"><option value="">Hamma holat</option>
+    {% for k,v in ORDER_UZ.items() %}<option value="{{ k }}" {{ 'selected' if k==status }}>{{ v }}</option>{% endfor %}</select>
+  <a class="btn ghost sm" href="/admin/export/payments.xlsx">{{ ico('download') }}Excel</a></form></div>
+<div class="card flush">{% if rows %}<div class="scroll"><table class="rt">
+  <thead><tr><th>#</th><th>Sana</th><th>Foydalanuvchi</th><th>Tarif</th><th class="num">Summa (so'm)</th><th>Holat</th><th>To'langan</th><th>Payme</th></tr></thead>
+  <tbody>{% for o in rows %}<tr><td data-label="#">#{{ o.id }}</td><td data-label="Sana">{{ o.created_at|dt }}</td>
+    <td data-label="Foydalanuvchi"><a href="/admin/users/{{ o.user_id }}">{{ o.full_name }}</a><small class="sub">{{ o.phone }}</small></td>
+    <td data-label="Tarif">{{ o.plan_title }}</td><td data-label="Summa" class="num">{{ (o.amount_tiyin//100)|uzs }}</td><td data-label="Holat">{{ ord_tag(o.status) }}</td>
+    <td data-label="To'langan">{{ o.paid_at|dt }}</td><td data-label="Payme" class="muted small">{{ o.pid or '—' }}{% if o.pstate is not none %} ({{ o.pstate }}){% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>{% else %}{{ empty("To'lov yo'q", 'card') }}{% endif %}</div>
+{{ pager('/admin/payments', page, total, per, '&status=' ~ status) }}
+{% endblock %}

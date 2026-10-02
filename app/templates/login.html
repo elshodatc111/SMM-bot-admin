@@ -1,0 +1,19 @@
+{% from "_macros.html" import ico %}
+<!doctype html>
+<html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex"><meta name="theme-color" content="#0f766e"><title>Kirish · AdminBot</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="/static/admin.css?v=3"></head>
+<body class="login">
+{% include "_sprite.html" %}
+<form method="post" action="/admin/login" class="login-card">
+  <span class="logo big">{{ ico('shield') }}</span>
+  <h1>AdminBot</h1>
+  <p class="muted">Litsenziya boshqaruv paneli</p>
+  {% if err %}<div class="flash bad" role="alert">{{ ico('alert') }}<span>{{ err }}</span></div>{% endif %}
+  <label>Parol
+    <span class="input-ico">{{ ico('lock') }}<input type="password" name="password" autocomplete="current-password" autofocus required></span>
+  </label>
+  <button class="btn block" type="submit">Kirish</button>
+</form>
+</body></html>

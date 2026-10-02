@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, tag, lic_tag, ord_tag, copy, empty %}{% block title %}{{ u.full_name or 'Foydalanuvchi' }}{% endblock %}
+{% block body %}
+<a class="back" href="/admin/users">{{ ico('back') }}Foydalanuvchilar</a>
+<div class="page-head"><div class="who big"><span class="avatar lg">{{ (u.full_name or u.tg_name or '?')[:1]|upper }}</span>
+  <div><h1>{{ u.full_name or u.tg_name }}</h1><p class="muted">{{ ('@'+u.username) if u.username else 'username yo\'q' }} · Telegram ID {{ u.tg_id }}</p></div></div>
+  <div class="actions">{% if u.blocked %}{{ tag('bad','bloklangan') }}{% elif u.registered %}{{ tag('ok','faol') }}{% else %}{{ tag('warn','ro\'yxatdan o\'tmagan') }}{% endif %}</div></div>
+<div class="grid2">
+<section class="card"><h2>{{ ico('users') }}Ma'lumot</h2>
+  <dl><dt>{{ ico('phone') }}Telefon</dt><dd>{{ u.phone or '—' }}</dd><dt>{{ ico('pin') }}Viloyat</dt><dd>{{ u.region or '—' }}</dd>
+  <dt>{{ ico('calendar') }}Ro'yxatdan o'tgan</dt><dd>{{ u.registered_at|dt if u.registered else 'yo\'q' }}</dd><dt>{{ ico('clock') }}Oxirgi faollik</dt><dd>{{ u.last_seen|dt }}</dd></dl>
+  <form method="post" action="/admin/users/{{ u.id }}/block"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <button class="btn {{ 'ghost' if u.blocked else 'danger' }}">{{ ico('ban') }}{{ 'Blokdan chiqarish' if u.blocked else 'Bloklash' }}</button></form>
+</section>
+<section class="card"><h2>{{ ico('send') }}Xabar yuborish</h2>
+  <form method="post" action="/admin/users/{{ u.id }}/message"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <textarea name="text" rows="3" placeholder="Matn (HTML: &lt;b&gt;, &lt;i&gt;, &lt;code&gt;)" required></textarea><button class="btn">{{ ico('send') }}Yuborish</button></form>
+  <hr><h2>{{ ico('gift') }}Qo'lda litsenziya berish</h2>
+  <form method="post" action="/admin/users/{{ u.id }}/grant" class="inline-form"><input type="hidden" name="csrf" value="{{ csrf }}">
+    <select name="plan_id">{% for p in plans %}<option value="{{ p.id }}">{{ p.title }}</option>{% endfor %}<option value="lifetime">Umrbod (faqat admin)</option></select>
+    <input name="note" placeholder="Izoh (ixtiyoriy)"><button class="btn">{{ ico('plus') }}Berish</button></form>
+</section>
+</div>
+<section class="card flush"><div class="card-head pad"><h2>{{ ico('key') }}Litsenziyalar</h2></div>
+{% if lics %}<div class="scroll"><table class="rt"><thead><tr><th>#</th><th>Tarif</th><th>Token</th><th>Holat</th><th>Tugaydi</th></tr></thead><tbody>
+{% for l in lics %}{% set st = eff_status(l) %}<tr><td data-label="#"><a href="/admin/licenses/{{ l.id }}">#{{ l.id }}</a></td><td data-label="Tarif">{{ l.plan_title }}</td>
+<td data-label="Token"><code>{{ l.token }}</code>{{ copy(l.token) }}</td><td data-label="Holat">{{ lic_tag(st) }}</td><td data-label="Tugaydi">{{ l.expires_at|dt }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}{{ empty('Litsenziya yo\'q', 'key') }}{% endif %}</section>
+<section class="card flush"><div class="card-head pad"><h2>{{ ico('card') }}Buyurtmalar</h2></div>
+{% if orders %}<div class="scroll"><table class="rt"><thead><tr><th>#</th><th>Sana</th><th>Tarif</th><th class="num">Summa</th><th>Holat</th></tr></thead><tbody>
+{% for o in orders %}<tr><td data-label="#">#{{ o.id }}</td><td data-label="Sana">{{ o.created_at|dt }}</td><td data-label="Tarif">{{ o.plan_title }}</td><td data-label="Summa" class="num">{{ (o.amount_tiyin//100)|uzs }}</td><td data-label="Holat">{{ ord_tag(o.status) }}</td></tr>{% endfor %}</tbody></table></div>
+{% else %}{{ empty('Buyurtma yo\'q', 'card') }}{% endif %}</section>
+{% endblock %}

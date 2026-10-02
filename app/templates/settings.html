@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, tag, copy %}{% block title %}Sozlamalar{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Sozlamalar</h1></div>
+<div class="grid2">
+<form method="post" action="/admin/settings" class="card">
+  <h2>{{ ico('sliders') }}Bot sozlamalari</h2>
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Salomlashuv matni (/start)<textarea name="welcome_text" rows="3">{{ vals.welcome_text }}</textarea></label>
+  <label>«Yordam» matni (aloqa ma'lumotlari)<textarea name="support_text" rows="3">{{ vals.support_text }}</textarea></label>
+  <label>Muddat tugashidan necha kun oldin eslatish <span class="muted small">(vergul bilan)</span><input name="reminder_days" value="{{ vals.reminder_days }}"></label>
+  <label>Yillik litsenziya: qurilma almashtirish limiti (marta)<input type="number" name="device_resets_per_license" min="0" max="20" value="{{ vals.device_resets_per_license }}"></label>
+  <label>To'lanmagan buyurtma necha soatdan keyin avtomatik bekor bo'ladi<input type="number" name="order_timeout_hours" min="1" max="48" value="{{ vals.order_timeout_hours }}"></label>
+  <label>To'lanmasa necha daqiqadan keyin eslatma yuboriladi <span class="muted small">(0 = o'chiq)</span><input type="number" name="order_warn_minutes" min="0" max="2879" value="{{ vals.order_warn_minutes }}"></label>
+  <button class="btn">{{ ico('check') }}Saqlash</button>
+</form>
+<section class="card"><h2>{{ ico('shield') }}Holat va ulanish</h2>
+<dl>
+  <dt>Bot</dt><dd>{{ tag('ok','ishlayapti') if info.bot else tag('bad','o\'chiq') }} <span class="muted">rejim: {{ info.mode }}</span></dd>
+  <dt>Payme</dt><dd>{{ tag('ok','Merchant ID bor') if info.merchant else tag('bad','Merchant ID yo\'q') }} {{ tag('ok','kalit bor') if info.key else tag('bad','kalit yo\'q') }} {{ tag('warn','sinov muhiti') if payme_test else tag('info','ishchi muhit') }}</dd>
+  <dt>Payme endpoint</dt><dd><code class="break">{{ payme_url }}</code>{{ copy(payme_url) }}</dd>
+  <dt>Admin Telegram ID</dt><dd>{{ tag('ok','berilgan') if info.admin_id else tag('warn','berilmagan') }}</dd>
+  <dt>Imzo ochiq kaliti</dt><dd><code class="break">{{ pubkey }}</code>{{ copy(pubkey) }}</dd>
+</dl>
+<p class="hint">{{ ico('alert') }}<span>Imzo kaliti (<code>data/ed25519.key</code>) yo'qolsa yoki almashtirilsa, mijozlardagi dasturlar javobni tekshira olmaydi. Zaxiralab qo'ying.</span></p></section>
+</div>
+{% endblock %}

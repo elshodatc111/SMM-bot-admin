@@ -1,0 +1,16 @@
+{% macro ico(name, cls='') %}<svg class="ico {{ cls }}" aria-hidden="true"><use href="#i-{{ name }}"/></svg>{% endmacro %}
+{% macro tag(kind, text) %}<span class="tag {{ kind }}"><i></i>{{ text }}</span>{% endmacro %}
+{% macro lic_tag(st) %}{{ tag(LIC_KIND[st], STATUS_UZ[st]) }}{% endmacro %}
+{% macro ord_tag(st) %}{{ tag(ORD_KIND[st], ORDER_UZ[st]) }}{% endmacro %}
+{% macro copy(text) %}<button type="button" class="icon-btn" data-copy="{{ text }}" title="Nusxalash" aria-label="Nusxalash"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg></button>{% endmacro %}
+{% macro empty(text, icon='inbox') %}<div class="empty"><svg class="ico" aria-hidden="true"><use href="#i-{{ icon }}"/></svg><p>{{ text }}</p></div>{% endmacro %}
+{% macro pager(url, page, total, per, extra='') %}
+  {% set pages = ((total + per - 1) // per) %}
+  {% if pages > 1 %}
+  <nav class="pager" aria-label="Sahifalar">
+    {% if page > 1 %}<a class="btn ghost sm" href="{{ url }}?page={{ page-1 }}{{ extra }}"><svg class="ico"><use href="#i-left"/></svg>Oldingi</a>{% else %}<span></span>{% endif %}
+    <span class="muted">{{ page }} / {{ pages }} · {{ total }} ta</span>
+    {% if page < pages %}<a class="btn ghost sm" href="{{ url }}?page={{ page+1 }}{{ extra }}">Keyingi<svg class="ico"><use href="#i-right"/></svg></a>{% else %}<span></span>{% endif %}
+  </nav>
+  {% endif %}
+{% endmacro %}

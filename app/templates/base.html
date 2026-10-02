@@ -1,0 +1,84 @@
+{% from "_macros.html" import ico %}
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f766e">
+<title>{% block title %}Admin{% endblock %} · AdminBot</title>
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="/static/admin.css?v=3">
+</head>
+<body>
+{% include "_sprite.html" %}
+{% set menu = [
+  ('Asosiy', [('dash','/admin/','home','Bosh sahifa'),('stats','/admin/stats','chart','Statistika')]),
+  ('Mijozlar', [('users','/admin/users','users','Foydalanuvchilar'),('lic','/admin/licenses','key','Litsenziyalar'),
+                ('dev','/admin/devices','monitor','Qurilma so\'rovlari'),('pay','/admin/payments','card','To\'lovlar')]),
+  ('Boshqaruv', [('plans','/admin/plans','tag','Tariflar'),('bc','/admin/broadcast','send','Xabar yuborish'),('set','/admin/settings','sliders','Sozlamalar')])
+] %}
+<div class="shell">
+  <aside class="side" id="side" aria-label="Menyu">
+    <div class="side-head">
+      <a class="brand" href="/admin/"><span class="logo">{{ ico('shield') }}</span><span>AdminBot<small>Litsenziya boshqaruvi</small></span></a>
+      <button class="icon-btn only-mobile" data-drawer="close" aria-label="Yopish">{{ ico('x') }}</button>
+    </div>
+    <nav class="side-nav">
+      {% for group, items in menu %}
+      <div class="nav-group">{{ group }}</div>
+      {% for k,u,i,t in items %}
+      <a href="{{ u }}" class="nav-link {{ 'on' if nav==k else '' }}">{{ ico(i) }}<span>{{ t }}</span>
+        {% if k=='dev' and pending_dev %}<b class="badge">{{ pending_dev }}</b>{% endif %}</a>
+      {% endfor %}
+      {% endfor %}
+    </nav>
+    <div class="side-foot">
+      <button class="nav-link" type="button" id="theme-btn">{{ ico('moon') }}<span>Qorong'i / yorug' rejim</span></button>
+      <form method="post" action="/admin/logout"><input type="hidden" name="csrf" value="{{ csrf }}">
+        <button class="nav-link" type="submit">{{ ico('logout') }}<span>Chiqish</span></button></form>
+    </div>
+  </aside>
+  <div class="scrim" data-drawer="close"></div>
+
+  <div class="content">
+    <header class="topbar">
+      <button class="icon-btn" data-drawer="open" aria-label="Menyu">{{ ico('menu') }}</button>
+      <span class="top-title">{{ self.title() }}</span>
+      <button class="icon-btn" type="button" id="theme-btn2" aria-label="Rejim">{{ ico('moon') }}</button>
+    </header>
+    <main>
+      {% if msg %}<div class="flash ok" role="status">{{ ico('check') }}<span>{{ msg }}</span></div>{% endif %}
+      {% if err %}<div class="flash bad" role="alert">{{ ico('alert') }}<span>{{ err }}</span></div>{% endif %}
+      {% block body %}{% endblock %}
+    </main>
+  </div>
+</div>
+<nav class="tabbar" aria-label="Tezkor menyu">
+  <a href="/admin/" class="{{ 'on' if nav=='dash' }}">{{ ico('home') }}<span>Bosh</span></a>
+  <a href="/admin/users" class="{{ 'on' if nav=='users' }}">{{ ico('users') }}<span>Mijozlar</span></a>
+  <a href="/admin/licenses" class="{{ 'on' if nav=='lic' }}">{{ ico('key') }}<span>Litsenziya</span></a>
+  <a href="/admin/payments" class="{{ 'on' if nav=='pay' }}">{{ ico('card') }}<span>To'lov</span></a>
+  <button type="button" data-drawer="open">{{ ico('menu') }}<span>Yana</span>{% if pending_dev %}<b class="dot"></b>{% endif %}</button>
+</nav>
+<script>
+(function(){
+  var d=document, b=d.body;
+  function open(){b.classList.add('drawer')} function close(){b.classList.remove('drawer')}
+  d.addEventListener('click',function(e){
+    var t=e.target.closest('[data-drawer]'); if(t){t.dataset.drawer==='open'?open():close();return}
+    var c=e.target.closest('[data-copy]');
+    if(c){var v=c.dataset.copy;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).catch(function(){
+        var a=d.createElement('textarea');a.value=v;d.body.appendChild(a);a.select();try{d.execCommand('copy')}catch(x){}a.remove()});
+      c.classList.add('done');setTimeout(function(){c.classList.remove('done')},1200)}
+  });
+  d.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+  function theme(){var cur=d.documentElement.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    var n=cur==='dark'?'light':'dark';d.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n)}catch(e){}}
+  ['theme-btn','theme-btn2'].forEach(function(i){var el=d.getElementById(i);if(el)el.addEventListener('click',theme)});
+  setTimeout(function(){d.querySelectorAll('.flash').forEach(function(f){f.classList.add('hide')})},5000);
+  d.querySelectorAll('.side a').forEach(function(a){a.addEventListener('click',close)});
+})();
+</script>
+</body>
+</html>

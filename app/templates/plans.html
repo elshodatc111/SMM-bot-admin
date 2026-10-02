@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, tag %}{% block title %}Tariflar{% endblock %}
+{% block body %}
+<div class="page-head"><h1>Tariflar</h1></div>
+<p class="hint">{{ ico('info') }}<span>Narx o'zgarishi faqat yangi xaridlarga ta'sir qiladi. Narxi 0 bo'lgan tarif sotuvga chiqmaydi.</span></p>
+<div class="plans">
+{% for p in plans %}
+<form method="post" action="/admin/plans/{{ p.id }}" class="card plan">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <div class="plan-top"><span class="ibox {{ ['blue','teal','amber'][loop.index0 % 3] }}">{{ ico('tag') }}</span>{{ tag('ok','sotuvda') if p.active else tag('mute','o\'chiq') }}</div>
+  <label>Nomi<input name="title" value="{{ p.title }}" required></label>
+  <div class="two"><label>Muddat (kun)<input name="days" type="number" min="1" value="{{ p.days }}" required></label>
+  <label>Narx (so'm)<input name="price" inputmode="numeric" value="{{ p.price_uzs }}" required></label></div>
+  <label class="chk"><input type="checkbox" name="active" value="1" {{ 'checked' if p.active }}><span>Sotuvda</span></label>
+  <button class="btn block">{{ ico('check') }}Saqlash</button>
+</form>
+{% endfor %}
+</div>
+{% endblock %}

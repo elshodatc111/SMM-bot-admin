@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% from "_macros.html" import ico, tag, empty %}{% block title %}Xabar yuborish{% endblock %}
+{% block body %}
+{% if running %}<meta http-equiv="refresh" content="5">{% endif %}
+<div class="page-head"><h1>Ommaviy xabar</h1></div>
+<form method="post" action="/admin/broadcast" class="card" onsubmit="return confirm('Xabar tanlangan foydalanuvchilarga yuboriladi. Davom etasizmi?')">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <label>Kimga<select name="audience">{% for k,v in audiences.items() %}<option value="{{ k }}">{{ v }} ({{ counts[k] }})</option>{% endfor %}</select></label>
+  <label>Matn <span class="muted small">(HTML: &lt;b&gt;qalin&lt;/b&gt;, &lt;i&gt;qiya&lt;/i&gt;, &lt;a href="..."&gt;havola&lt;/a&gt;)</span><textarea name="text" rows="6" required></textarea></label>
+  <div class="btn-row"><button class="btn">{{ ico('send') }}Yuborish</button>
+  <button class="btn ghost" formaction="/admin/broadcast/test" formnovalidate onclick="this.form.onsubmit=null">Faqat o'zimga test</button></div>
+</form>
+<section class="card flush"><div class="card-head pad"><h2>{{ ico('clock') }}Yuborilganlar</h2></div>
+{% if items %}<div class="scroll"><table class="rt">
+  <thead><tr><th>#</th><th>Sana</th><th>Auditoriya</th><th>Holat</th><th>Yuborildi</th><th>Xato</th><th>Jami</th><th>Matn</th><th></th></tr></thead>
+  <tbody>{% for b in items %}<tr><td data-label="#">#{{ b.id }}</td><td data-label="Sana">{{ b.created_at|dt }}</td><td data-label="Auditoriya">{{ audiences.get(b.audience, b.audience) }}</td>
+    <td data-label="Holat">{{ tag('info','yuborilmoqda') if b.status=='running' else (tag('ok','tugadi') if b.status=='done' else tag('mute','to\'xtatilgan')) }}</td>
+    <td data-label="Yuborildi">{{ b.sent }}</td><td data-label="Xato">{{ b.failed }}</td><td data-label="Jami">{{ b.total }}</td><td data-label="Matn" class="small clip">{{ b.text[:80] }}</td>
+    <td class="act">{% if b.status=='running' %}<form method="post" action="/admin/broadcast/{{ b.id }}/cancel"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn danger sm">To'xtatish</button></form>{% endif %}</td></tr>{% endfor %}</tbody>
+</table></div>{% else %}{{ empty('Hali xabar yuborilmagan', 'send') }}{% endif %}</section>
+{% endblock %}
